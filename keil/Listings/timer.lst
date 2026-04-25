@@ -1,0 +1,218 @@
+C51 COMPILER V9.60.7.0   TIMER                                                             04/24/2026 14:09:27 PAGE 1   
+
+
+C51 COMPILER V9.60.7.0, COMPILATION OF MODULE TIMER
+OBJECT MODULE PLACED IN .\Objects\timer.obj
+COMPILER INVOKED BY: D:\MySoftware\Keil_v5\C51\BIN\C51.EXE ..\code\timer.c OMF2 OPTIMIZE(8,SPEED) BROWSE INCDIR(..\code;
+                    -..\..\Libary\StdDriver\inc;..\..\Libary\Device\CMS8F003\Include) DEBUG PRINT(.\Listings\timer.lst) TABS(2) OBJECT(.\Obje
+                    -cts\timer.obj)
+
+line level    source
+
+   1          /*******************************************************************************
+   2          * Copyright (C) 2019 China Micro Semiconductor Limited Company. All Rights Reserved.
+   3          *
+   4          * This software is owned and published by CMS LLC.
+   5          *
+   6          * BY DOWNLOADING, INSTALLING OR USING THIS SOFTWARE, YOU AGREE TO BE BOUND
+   7          * BY ALL THE TERMS AND CONDITIONS OF THIS AGREEMENT.
+   8          *
+   9          * This software contains source code for use with CMS
+  10          * components. This software is licensed by CMS to be adapted only
+  11          * for use in systems utilizing CMS components. CMS shall not be
+  12          * responsible for misuse or illegal use of this software for devices not
+  13          * supported herein. CMS is providing this software "AS IS" and will
+  14          * not be responsible for issues arising from incorrect user implementation
+  15          * of the software.
+  16          *
+  17          * This software may be replicated in part or whole for the licensed use,
+  18          * with the restriction that this Disclaimer and Copyright notice must be
+  19          * included with each copy of this software, whether used in part or whole,
+  20          * at all times.
+  21          */
+  22          
+  23          /****************************************************************************/
+  24          /** \file demo_timer.c
+  25          **
+  26          **  
+  27          **
+  28          **  History:
+  29          **  
+  30          *****************************************************************************/
+  31          /****************************************************************************/
+  32          /*  include files
+  33          *****************************************************************************/
+  34          #include "timer.h"
+  35          /****************************************************************************/
+  36          /*  Local pre-processor symbols('#define')
+  37          ****************************************************************************/
+  38          
+  39          /****************************************************************************/
+  40          /*  Global variable definitions(declared in header file with 'extern')
+  41          ****************************************************************************/
+  42          
+  43          /****************************************************************************/
+  44          /*  Local type definitions('typedef')
+  45          ****************************************************************************/
+  46          
+  47          /****************************************************************************/
+  48          /*  Local variable  definitions('static')
+  49          ****************************************************************************/
+  50          
+  51          /****************************************************************************/
+  52          /*  Local function prototypes('static')
+  53          ****************************************************************************/
+C51 COMPILER V9.60.7.0   TIMER                                                             04/24/2026 14:09:27 PAGE 2   
+
+  54          
+  55          /****************************************************************************/
+  56          /*  Function implementation - global ('extern') and local('static')
+  57          ****************************************************************************/
+  58          /******************************************************************************
+  59          ** \brief  TMR1_Config
+  60          ** \param [in] 
+  61          **              
+  62          ** \return  none
+  63          ** \note  
+  64          ******************************************************************************/
+  65          /*-------------------------------------------
+  66          备注：   定时时间计算方法
+  67                    定时时间T = {1/[(Fosc)*预分频比)]}*(65535-[TMR1H:TMR1L])
+  68                    本程序计算示例：
+  69                    T = {1/[(16)*8]}*(65536 - 63536)
+  70                      = 1000 us
+  71          -------------------------------------------*/
+  72          void TMR1_Config(void)
+  73          {
+  74   1        /*
+  75   1        (1)设置Timer的运行模式
+  76   1        */  
+  77   1        T1CON = 0x30;       //使用内部时钟源Fosc，预分频比为1:8      
+  78   1        /*                  
+  79   1        (2)设置Timer周期     
+  80   1        */                  
+  81   1        TMR1L = 0x30;       //赋初值
+  82   1        TMR1H = 0xF8; 
+  83   1        nop_();             //TMR1L,TMR1H执行后需要一个nop
+  84   1        /*
+  85   1        (3)开启中断
+  86   1        */
+  87   1        PIR1 &= 0xF7;       //清中断标志位
+  88   1        nop_();             //PIRx执行后需要一个nop
+  89   1        PIE1 |= 0X08;       //允许Timer1中断
+  90   1        /*
+  91   1        (4)设置Timer中断优先级
+  92   1        */  
+  93   1        //IRQ_SET_PRIORITY(IRQ_TMR1); //如果选择Timer1中断为高优先级，打开此语句
+  94   1        IRQ_ALL_ENABLE();   //使能中断
+  95   1      
+  96   1        /*
+  97   1        (5)开启Timer
+  98   1        */
+  99   1        T1CON |= 0x01;    //开启Timer1
+ 100   1      }
+ 101          
+ 102          
+ 103          
+ 104          volatile bit flag_2ms;
+ 105          volatile bit flag_10ms;
+ 106          volatile bit flag_4ms;
+ 107          volatile bit flag_100ms;
+ 108          volatile bit flag_500ms;
+ 109          volatile bit flag_10s;
+ 110          volatile bit flag_15s;
+ 111          volatile unsigned char counter_2ms = 0;
+ 112          volatile unsigned char counter_10ms = 0;
+ 113          volatile unsigned char counter_4ms = 0;
+ 114          volatile unsigned char counter_100ms = 0;
+ 115          volatile unsigned char counter_500ms = 0;
+C51 COMPILER V9.60.7.0   TIMER                                                             04/24/2026 14:09:27 PAGE 3   
+
+ 116          volatile unsigned char counter_10s = 0;
+ 117          volatile unsigned char counter_15s = 0;
+ 118          volatile unsigned char delay01_5min;
+ 119          volatile unsigned char delay02_5min;
+ 120          
+ 121          void IRQHandler_call(void){
+ 122   1        
+ 123   1        //定时触发系统
+ 124   1        if(++counter_2ms >= 2){
+ 125   2            counter_2ms = 0;
+ 126   2            flag_2ms = 1;
+ 127   2          if(++counter_4ms >= 2){
+ 128   3              counter_4ms = 0;
+ 129   3              flag_4ms = 1;
+ 130   3          }
+ 131   2          if(++counter_10ms >= 5){
+ 132   3              counter_10ms = 0;
+ 133   3              flag_10ms = 1;          
+ 134   3            if(++counter_100ms >= 10){
+ 135   4                counter_100ms = 0;
+ 136   4                flag_100ms = 1;           
+ 137   4              if(++counter_500ms >= 5){
+ 138   5                  counter_500ms = 0;
+ 139   5                  flag_500ms = 1;
+ 140   5                  if(++counter_10s >= 20){
+ 141   6                    counter_10s = 0;  //休眠专用
+ 142   6                    flag_10s = 1;
+ 143   6                  }
+ 144   5                  if(++counter_15s >= 30){
+ 145   6                    counter_15s = 0;
+ 146   6                    flag_15s = 1; 
+ 147   6                    if(delay01_5min > 0){
+ 148   7                      delay01_5min--;
+ 149   7                    }
+ 150   6                    if(delay02_5min > 0){
+ 151   7                      delay02_5min--;
+ 152   7                    }             
+ 153   6                  }           
+ 154   5                }
+ 155   4              }
+ 156   3            }
+ 157   2          }
+ 158   1      }
+ 159          
+ 160          
+ 161          
+ 162          
+ 163          
+ 164          
+ 165          
+ 166          
+ 167          
+ 168          
+ 169          
+ 170          
+ 171          
+ 172          
+ 173          
+ 174          
+ 175          
+ 176          
+ 177          
+C51 COMPILER V9.60.7.0   TIMER                                                             04/24/2026 14:09:27 PAGE 4   
+
+ 178          
+ 179          
+ 180          
+ 181          
+ 182          
+ 183          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    144    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      9    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =      7    ----
+   EDATA SIZE       =   ----    ----
+   HDATA SIZE       =   ----    ----
+   XDATA CONST SIZE =   ----    ----
+   FAR CONST SIZE   =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

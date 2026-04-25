@@ -1,0 +1,1 @@
+"..\code\iic.c" OMF2 OPTIMIZE (8,SPEED) BROWSE INCDIR(..\code;..\..\Libary\StdDriver\inc;..\..\Libary\Device\CMS8F003\Include) DEBUG PRINT(.\Listings\iic.lst) TABS (2) OBJECT(.\Objects\iic.obj)

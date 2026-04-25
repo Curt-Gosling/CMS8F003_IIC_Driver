@@ -1,0 +1,12 @@
+<McuConfig>
+<mcuName>CMS8F003</mcuName>
+<power>1</power>
+<config>
+<data>0xFB</data>
+<data>0xFF</data>
+<data>0xFF</data>
+<data>0x57</data>
+<data>0x00</data>
+<data>0xFF</data>
+</config>
+</McuConfig>

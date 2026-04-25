@@ -1,0 +1,202 @@
+C51 COMPILER V9.60.7.0   IIC                                                               04/25/2026 16:57:27 PAGE 1   
+
+
+C51 COMPILER V9.60.7.0, COMPILATION OF MODULE IIC
+OBJECT MODULE PLACED IN .\Objects\iic.obj
+COMPILER INVOKED BY: D:\MySoftware\Keil_v5\C51\BIN\C51.EXE ..\code\iic.c OMF2 OPTIMIZE(8,SPEED) BROWSE INCDIR(..\code;..
+                    -\..\Libary\StdDriver\inc;..\..\Libary\Device\CMS8F003\Include) DEBUG PRINT(.\Listings\iic.lst) TABS(2) OBJECT(.\Objects\
+                    -iic.obj)
+
+line level    source
+
+   1          /*  include files
+   2          *****************************************************************************/
+   3          #include "iic.h"
+   4          #include "uart.h"
+   5          #include "stdio.h"
+   6          /****************************************************************************/
+   7          /*  Local pre-processor symbols('#define')
+   8          ****************************************************************************/
+   9          #define   IIC_SCL_IO        P04   //SCL，时钟口
+  10          #define   IIC_SDA_IO        P05   //SDA，数据口
+  11          
+  12          #define   TRUE          1
+  13          #define   FALSE         0
+  14          /****************************************************************************/
+  15          /*  Global variable definitions(declared in header file with 'extern')
+  16          ****************************************************************************/
+  17          
+  18          /****************************************************************************/
+  19          /*  Local type definitions('typedef')
+  20          ****************************************************************************/
+  21          // IIC操作状态定义
+  22          typedef enum {
+  23              IIC_IDLE,        // 空闲
+  24              IIC_BUSY,        // 忙
+  25              IIC_ERROR        // 操作失败
+  26          } IIC_Status_t;
+  27          static IIC_Status_t IIC_Status = IIC_IDLE;
+  28          
+  29          // IIC事务上下文
+  30          typedef struct {
+  31              unsigned char Step;     //时序步骤
+  32              unsigned char DevAddr;  //设备地址+写
+  33              unsigned char RegAddr;  //设备寄存器地址
+  34              unsigned char NeedNack; //ACK应答标记
+  35          } IIC_Context_t;
+  36          static IIC_Context_t iic_ctx = {0};
+  37          
+  38          volatile unsigned char IIC_TxData;
+  39          volatile unsigned char IIC_RxData;
+  40          
+  41          /**********************************************************
+  42           * 函数：IIC_Read_Adress_Byte
+  43           * 功能：发起读操作（异步）
+  44           **********************************************************/
+  45          void IIC_Read_Adress_Byte(unsigned char Dev_Addr, unsigned char Reg_Addr)
+  46          {
+  47   1          if(IIC_Status != IIC_IDLE){
+  48   2              return;
+  49   2          }
+  50   1          
+  51   1          IIC_Status = IIC_BUSY;
+  52   1          iic_ctx.Step = 1;
+  53   1      
+C51 COMPILER V9.60.7.0   IIC                                                               04/25/2026 16:57:27 PAGE 2   
+
+  54   1          iic_ctx.DevAddr = Dev_Addr;
+  55   1          iic_ctx.RegAddr = Reg_Addr;
+  56   1          iic_ctx.NeedNack = 1;
+  57   1      
+  58   1          IICCON2 |= 0x01; // START 
+  59   1      }
+  60          /**********************************************************
+  61           * 函数：IIC_Write_One_Byte
+  62           * 功能：发起写操作（异步）
+  63           **********************************************************/
+  64          void IIC_Write_One_Byte(unsigned char Dev_Addr, unsigned char Reg_Addr, unsigned char Rdata)
+  65          {
+  66   1          if(IIC_Status != IIC_IDLE) return;
+  67   1      
+  68   1          IIC_Status = IIC_BUSY;
+  69   1          iic_ctx.Step = 1;
+  70   1      
+  71   1          iic_ctx.DevAddr = Dev_Addr;
+  72   1          iic_ctx.RegAddr = Reg_Addr;
+  73   1          IIC_TxData = Rdata;
+  74   1      
+  75   1          IICCON2 |= 0x01; // START
+  76   1      }
+  77          
+  78          // IIC读写事务状态机
+  79          void IIC_StateMachine_ISR(void)
+  80          {
+  81   1          switch(iic_ctx.Step){
+  82   2              case 1: 
+  83   2                  IICBUF = iic_ctx.DevAddr; //发设备地址+写
+  84   2                  iic_ctx.Step = 2; 
+  85   2                  break;
+  86   2              case 2:  
+  87   2                  IICBUF = iic_ctx.RegAddr; //发寄存器地址
+  88   2                  iic_ctx.Step = 3;
+  89   2                  break;
+  90   2              // ========== 读流程分支 ==========
+  91   2              case 3: 
+  92   2                  if(iic_ctx.NeedNack){
+  93   3                      IICCON2 |= 0x02; //RESTART
+  94   3                      iic_ctx.Step = 4;
+  95   3                  }
+  96   2                  // ========== 写流程分支 ==========
+  97   2                  else {
+  98   3                      IICBUF = 0x30;  //发送数据
+  99   3                      iic_ctx.Step = 8;
+ 100   3                  }
+ 101   2                  break;
+ 102   2              case 4: 
+ 103   2                  IICBUF = iic_ctx.DevAddr|0x01; //发设备地址+读
+ 104   2                  iic_ctx.Step = 5;
+ 105   2                  break;
+ 106   2              case 5: 
+ 107   2                  IICCON2 |= 0x08; //读取数据
+ 108   2                  iic_ctx.Step = 6;
+ 109   2                  break;
+ 110   2              case 6: 
+ 111   2                  IIC_RxData = IICBUF;  // 保存接收到的数据
+ 112   2                  IICCON2 |= 0x20;      // ACKDT = 1，即 NACK    
+ 113   2                  IICCON2 |= 0x10;      // ACKEN = 1，启动应答序列
+ 114   2                  iic_ctx.Step = 7;
+ 115   2                  break;
+C51 COMPILER V9.60.7.0   IIC                                                               04/25/2026 16:57:27 PAGE 3   
+
+ 116   2              case 7:
+ 117   2                  IICCON2 |= 0x04; // STOP
+ 118   2                  iic_ctx.Step = 9;
+ 119   2                  break;
+ 120   2              case 8:
+ 121   2                  IICCON2 |= 0x04; //STOP
+ 122   2                  iic_ctx.Step = 9;
+ 123   2                  break;
+ 124   2              case 9:
+ 125   2                  IIC_Status = IIC_IDLE;
+ 126   2                  iic_ctx.Step = 0;
+ 127   2                  iic_ctx.NeedNack = 0;
+ 128   2                  break;
+ 129   2              default:
+ 130   2                  IIC_Set_Master();
+ 131   2                  IIC_Status = IIC_ERROR;
+ 132   2                  iic_ctx.Step = 0;
+ 133   2                  break;
+ 134   2          }
+ 135   1      
+ 136   1      }
+ 137          /***********************************************
+ 138          函数名称：IIC_Set_Master
+ 139          函数功能：IIC状态设置
+ 140          入口参数：无
+ 141          出口参数：无
+ 142          备注：
+ 143          ************************************************/
+ 144          void IIC_Set_Master()
+ 145          { 
+ 146   1        IIC_SDA_IO = 1;         //SDA及SCL为输入口使能IIC后自动为漏极开路
+ 147   1        IIC_SCL_IO = 1;         
+ 148   1        IICADD = 0x24;          //时钟=FSYS/(4*(IICADD+4)) 100khz
+ 149   1        IICSTAT = 0x00;         
+ 150   1        IICCON = 0x20;          //主控模式
+ 151   1        IICCON2 = 0x00;
+ 152   1      }
+ 153          
+ 154          void IIC_Config(void)
+ 155          {
+ 156   1        IICSEL = 0x00;  // IIC通讯口选择 SDA=P05, SCL=P04
+ 157   1        GPIO_ENABLE_INPUT(P0TRIS, GPIO_PIN_4);    //初始化P04为输入口
+ 158   1        GPIO_ENABLE_INPUT(P0TRIS, GPIO_PIN_5);    //初始化P05为输入口 
+ 159   1        IIC_Set_Master();
+ 160   1          // 开启IIC中断
+ 161   1          PIR2 &= 0xFD;         //清IICIF标志位
+ 162   1          nop_();
+ 163   1          PIE2 |= 0x02;         //使能IIC中断
+ 164   1          IRQ_ALL_ENABLE();     //使能中断
+ 165   1      }
+ 166          
+ 167          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    216    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      7    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+C51 COMPILER V9.60.7.0   IIC                                                               04/25/2026 16:57:27 PAGE 4   
+
+   EDATA SIZE       =   ----    ----
+   HDATA SIZE       =   ----    ----
+   XDATA CONST SIZE =   ----    ----
+   FAR CONST SIZE   =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

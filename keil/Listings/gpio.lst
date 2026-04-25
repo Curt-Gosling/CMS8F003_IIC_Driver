@@ -1,0 +1,342 @@
+C51 COMPILER V9.60.7.0   GPIO                                                              04/24/2026 14:09:26 PAGE 1   
+
+
+C51 COMPILER V9.60.7.0, COMPILATION OF MODULE GPIO
+OBJECT MODULE PLACED IN .\Objects\gpio.obj
+COMPILER INVOKED BY: D:\MySoftware\Keil_v5\C51\BIN\C51.EXE ..\..\Libary\StdDriver\src\gpio.c OMF2 OPTIMIZE(8,SPEED) BROW
+                    -SE INCDIR(..\code;..\..\Libary\StdDriver\inc;..\..\Libary\Device\CMS8F003\Include) DEBUG PRINT(.\Listings\gpio.lst) TABS
+                    -(2) OBJECT(.\Objects\gpio.obj)
+
+line level    source
+
+   1          /*******************************************************************************
+   2          * Copyright (C) 2019 China Micro Semiconductor Limited Company. All Rights Reserved.
+   3          *
+   4          * This software is owned and published by CMS LLC.
+   5          *
+   6          * BY DOWNLOADING, INSTALLING OR USING THIS SOFTWARE, YOU AGREE TO BE BOUND
+   7          * BY ALL THE TERMS AND CONDITIONS OF THIS AGREEMENT.
+   8          *
+   9          * This software contains source code for use with CMS
+  10          * components. This software is licensed by CMS to be adapted only
+  11          * for use in systems utilizing CMS components. CMS shall not be
+  12          * responsible for misuse or illegal use of this software for devices not
+  13          * supported herein. CMS is providing this software "AS IS" and will
+  14          * not be responsible for issues arising from incorrect user implementation
+  15          * of the software.
+  16          *
+  17          * This software may be replicated in part or whole for the licensed use,
+  18          * with the restriction that this Disclaimer and Copyright notice must be
+  19          * included with each copy of this software, whether used in part or whole,
+  20          * at all times.
+  21          */
+  22          
+  23          /****************************************************************************/
+  24          /** \file gpio.c
+  25          **
+  26          ** 
+  27          **
+  28          **  History:
+  29          **  
+  30          *****************************************************************************/
+  31          /****************************************************************************/
+  32          /*  include files
+  33          *****************************************************************************/
+  34          #include "gpio.h"
+  35          
+  36          /****************************************************************************/
+  37          /*  Local pre-processor symbols/macros('#define')
+  38          ****************************************************************************/
+  39          
+  40          /****************************************************************************/
+  41          /*  Global variable definitions(declared in header file with 'extern')
+  42          ****************************************************************************/
+  43          
+  44          /****************************************************************************/
+  45          /*  Local type definitions('typedef')
+  46          ****************************************************************************/
+  47          
+  48          /****************************************************************************/
+  49          /*  Local variable  definitions('static')
+  50          ****************************************************************************/
+  51          
+  52          /****************************************************************************/
+  53          /*  Local function prototypes('static')
+C51 COMPILER V9.60.7.0   GPIO                                                              04/24/2026 14:09:26 PAGE 2   
+
+  54          ****************************************************************************/
+  55          
+  56          /****************************************************************************/
+  57          /*  Function implementation - global ('extern') and local('static')
+  58          ****************************************************************************/
+  59          /****************************************************************************
+  60           ** \brief   GPIO_ConfigGPIOMode
+  61           **      配置GPIO模式
+  62           ** \param [in] Port  ： GPIO0、GPIO1、GPIO2、GPIO3
+  63           **        PinMSK: GPIO_PIN_0_MSK ~ GPIO_PIN_7_MSK  
+  64           **            PinMode：
+  65           **             (1)GPIO_OPEN_DRAIN_MODE:  开漏输出模式
+  66           **             (2)GPIO_UP_MODE :         上拉模式
+  67           **             (3)GPIO_DR_MODE :         下拉模式
+  68           ** \return  none
+  69           ** \note   
+  70           ***************************************************************************/
+  71          void GPIO_ConfigGPIOMode( uint8_t Port, uint8_t PinMSK, uint8_t PinMode)
+  72          {
+  73   1        switch(Port)
+  74   1        {
+  75   2          case GPIO0:
+  76   2            {
+  77   3              if(PinMode & GPIO_OPEN_DRAIN_MODE)
+  78   3              {
+  79   4                P0OD |= PinMSK;
+  80   4              }
+  81   3              if(PinMode & GPIO_UP_MODE)
+  82   3              {
+  83   4                P0UP |= PinMSK;
+  84   4              }
+  85   3              if(PinMode & GPIO_DR_MODE)
+  86   3              {
+  87   4                P0RD |= PinMSK;
+  88   4              }     
+  89   3            }
+  90   2            break;
+  91   2          case GPIO1:
+  92   2            {
+  93   3              if(PinMode & GPIO_OPEN_DRAIN_MODE)
+  94   3              {
+  95   4                P1OD |= PinMSK;
+  96   4              }
+  97   3              if(PinMode & GPIO_UP_MODE)
+  98   3              {
+  99   4                P1UP |= PinMSK;
+ 100   4              }
+ 101   3              if(PinMode & GPIO_DR_MODE)
+ 102   3              {
+ 103   4                P1RD |= PinMSK;
+ 104   4              }     
+ 105   3            }
+ 106   2            break;
+ 107   2          case GPIO2:
+ 108   2            {
+ 109   3              if(PinMode & GPIO_OPEN_DRAIN_MODE)
+ 110   3              {
+ 111   4                P2OD |= PinMSK;
+ 112   4              }
+ 113   3              if(PinMode & GPIO_UP_MODE)
+ 114   3              {
+ 115   4                P2UP |= PinMSK;
+C51 COMPILER V9.60.7.0   GPIO                                                              04/24/2026 14:09:26 PAGE 3   
+
+ 116   4              }
+ 117   3              if(PinMode & GPIO_DR_MODE)
+ 118   3              {
+ 119   4                P2RD |= PinMSK;
+ 120   4              }     
+ 121   3            }
+ 122   2            break;
+ 123   2          case GPIO3:
+ 124   2            {
+ 125   3              if(PinMode & GPIO_OPEN_DRAIN_MODE)
+ 126   3              {
+ 127   4                P3OD |= PinMSK;
+ 128   4              }
+ 129   3              if(PinMode & GPIO_UP_MODE)
+ 130   3              {
+ 131   4                P3UP |= PinMSK;
+ 132   4              }
+ 133   3              if(PinMode & GPIO_DR_MODE)
+ 134   3              {
+ 135   4                P3RD |= PinMSK;
+ 136   4              }     
+ 137   3            }
+ 138   2            break;
+ 139   2          default:
+ 140   2            break;
+ 141   2        }
+ 142   1      }
+ 143          
+ 144          /********************************************************************************
+ 145           ** \brief   GPIO_IntSelect
+ 146           **      选择IO中断的触发方式
+ 147           ** \param [in] Port  ： GPIO0、GPIO1、GPIO2、GPIO3 
+ 148           **         PinMsk: GPIO_PIN_0 ~ GPIO_PIN_7
+ 149           ** \param [in] Pulse ： 
+ 150           **                   (0):GPIO_INT_NONE     
+ 151           **                   (1):GPIO_INT_RISING     
+ 152           **                   (2):GPIO_INT_FALLING      
+ 153           **                   (3):GPIO_INT_BOTH_EDGE          
+ 154           ** \return  none
+ 155           ** \note
+ 156           **  (1)P0的PinMSK输入值范围：GPIO_PIN_4 ~ GPIO_PIN_5
+ 157           **  (2)P1的PinMSK输入值范围：GPIO_PIN_3 ~ GPIO_PIN_7
+ 158           **  (3)P2的PinMSK输入值范围：GPIO_PIN_1 ~ GPIO_PIN_6
+ 159           **  (4)P3的PinMSK输入值范围：GPIO_PIN_0 ~ GPIO_PIN_2、GPIO_PIN_5、GPIO_PIN_6
+ 160           ******************************************************************************/
+ 161          void GPIO_IntSelect(uint8_t Port,uint8_t PinMsk,uint8_t Pulse)
+ 162          {
+ 163   1        
+ 164   1        switch(Port)
+ 165   1        {
+ 166   2          case GPIO0:   
+ 167   2                if(PinMsk == GPIO_PIN_4)
+ 168   2                {
+ 169   3                  P0INT1 &= ~(PORT_P0INT1_P04INTEG_Msk) ;
+ 170   3                  P0INT1 |= Pulse ;
+ 171   3                }
+ 172   2                else
+ 173   2                {
+ 174   3                  P0INT1 &= ~(PORT_P0INT1_P05INTEG_Msk) ;
+ 175   3                  P0INT1 |= Pulse << PORT_P0INT1_P05INTEG_Pos;
+ 176   3                }
+ 177   2          break;
+C51 COMPILER V9.60.7.0   GPIO                                                              04/24/2026 14:09:26 PAGE 4   
+
+ 178   2          case GPIO1:
+ 179   2                if(PinMsk <= GPIO_PIN_3)
+ 180   2                {
+ 181   3                  P1INT0 &= ~(3<< (2 * PinMsk)) ;
+ 182   3                  P1INT0 |= Pulse << (PinMsk * 2);
+ 183   3                }
+ 184   2                else
+ 185   2                {
+ 186   3                  P1INT1 &= ~(3<< (2*(PinMsk - GPIO_PIN_4))) ;
+ 187   3                  P1INT1 |= Pulse << ((PinMsk - GPIO_PIN_4) * 2);
+ 188   3                }
+ 189   2          break;
+ 190   2          case GPIO2:
+ 191   2                if(PinMsk <= GPIO_PIN_3)
+ 192   2                {
+ 193   3                  P2INT0 &= ~(3<< (2 * PinMsk)) ;
+ 194   3                  P2INT0 |= Pulse << (PinMsk * 2);
+ 195   3                }
+ 196   2                else
+ 197   2                {
+ 198   3                  P2INT1 &= ~(3<< (2*(PinMsk - GPIO_PIN_4))) ;
+ 199   3                  P2INT1 |= Pulse << ((PinMsk - GPIO_PIN_4) * 2);
+ 200   3                }
+ 201   2          break;
+ 202   2          case GPIO3:
+ 203   2                if(PinMsk <= GPIO_PIN_3)
+ 204   2                {
+ 205   3                  P3INT0 &= ~(3<< (2 * PinMsk)) ;
+ 206   3                  P3INT0 |= Pulse << (PinMsk * 2);
+ 207   3                }
+ 208   2                else
+ 209   2                {
+ 210   3                  P3INT1 &= ~(3<< (2*(PinMsk - GPIO_PIN_4))) ;
+ 211   3                  P3INT1 |= Pulse << ((PinMsk - GPIO_PIN_4) * 2);
+ 212   3                }
+ 213   2          break;
+ 214   2          default:
+ 215   2          break;
+ 216   2        }
+ 217   1      }
+ 218          
+ 219          /********************************************************************************
+ 220           ** \brief   GPIO_EnableInt
+ 221           **      使能IO口的中断功能
+ 222           ** \param [in] Port  ： GPIO0、GPIO1、GPIO2、GPIO3      
+ 223           ** \return  none
+ 224           ** \note   
+ 225           ******************************************************************************/
+ 226          void GPIO_EnableInt(uint8_t Port)
+ 227          {
+ 228   1        PIE2 |= 1 << (Port + IRQ_PIE2_P0IE_Pos);
+ 229   1      }
+ 230          /********************************************************************************
+ 231           ** \brief   GPIO_DisableInt
+ 232           **      关闭IO口的中断功能
+ 233           ** \param [in] Port  ： GPIO0、GPIO1、GPIO2、GPIO3      
+ 234           ** \return  none
+ 235           ** \note   
+ 236           ******************************************************************************/
+ 237          void GPIO_DisableInt(uint8_t Port)
+ 238          {
+ 239   1        PIE2 &= ~(1 << (Port + IRQ_PIE2_P0IE_Pos));
+C51 COMPILER V9.60.7.0   GPIO                                                              04/24/2026 14:09:26 PAGE 5   
+
+ 240   1      }
+ 241          
+ 242           /******************************************************************************
+ 243           ** \brief   GPIO_GetIntFlag
+ 244           **      获取中断标志
+ 245           ** \param [in] Port  ： GPIO0、GPIO1、GPIO2、GPIO3    
+ 246           ** \return  0：无中断产生
+ 247           **      1：有中断产生
+ 248           ** \note  
+ 249           ******************************************************************************/
+ 250          uint8_t  GPIO_GetIntFlag(uint8_t Port)
+ 251          {
+ 252   1        uint8_t PinIntFlag = 0;
+ 253   1        
+ 254   1        PinIntFlag = PIR2 & (1<<(Port + IRQ_PIR2_P0IF_Pos));
+ 255   1        return( (PinIntFlag)? 1:0);
+ 256   1      }
+ 257           /********************************************************************************
+ 258           ** \brief   GPIO_ClearIntFlag
+ 259           **     清除中断标志位
+ 260           ** \param [in] Port  ： GPIO0、GPIO1、GPIO2、GPIO3    
+ 261           ** \return  none
+ 262           ** \note    
+ 263           ******************************************************************************/
+ 264          void GPIO_ClearIntFlag(uint8_t Port)
+ 265          {
+ 266   1        PIR2 &= ~(1<<(Port + IRQ_PIR2_P0IF_Pos));
+ 267   1        nop_();                     //PIRx执行后需要一个nop
+ 268   1      }
+ 269          
+ 270           /********************************************************************************
+ 271           ** \brief   GPIO_ANInput_Select
+ 272           **     设置IO口为模拟输入口
+ 273           ** \param [in] Port  ： GPIO0、GPIO1、GPIO2、GPIO3 
+ 274           **         PinMsk: GPIO_PIN_0_MSK ~ GPIO_PIN_7_MSK
+ 275           ** \return  none
+ 276           ** \note  
+ 277           **  (1)P0的PinMSK输入值范围：GPIO_PIN_4_MSK ~ GPIO_PIN_5_MSK
+ 278           **  (2)P1的PinMSK输入值范围：GPIO_PIN_3_MSK ~ GPIO_PIN_7_MSK
+ 279           **  (3)P2的PinMSK输入值范围：GPIO_PIN_1_MSK ~ GPIO_PIN_6_MSK
+ 280           **  (4)P3的PinMSK输入值范围：GPIO_PIN_0_MSK ~ GPIO_PIN_2_MSK、GPIO_PIN_5_MSK、GPIO_PIN_6_MSK
+ 281           ******************************************************************************/
+ 282          void GPIO_ANInput_Select(uint8_t Port,uint8_t PinMsk)
+ 283          {
+ 284   1          switch(Port)
+ 285   1        {
+ 286   2          case GPIO0:   
+ 287   2                ANSEL0 |= PinMsk;
+ 288   2          break;
+ 289   2          case GPIO1:
+ 290   2                ANSEL1 |= PinMsk;
+ 291   2          break;
+ 292   2          case GPIO2:
+ 293   2                ANSEL2 |= PinMsk;
+ 294   2          break;
+ 295   2          case GPIO3:
+ 296   2                ANSEL3 |= PinMsk;
+ 297   2          break;
+ 298   2          default:
+ 299   2          break;
+ 300   2        }
+ 301   1      }
+C51 COMPILER V9.60.7.0   GPIO                                                              04/24/2026 14:09:26 PAGE 6   
+
+ 302          
+ 303          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    456    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+   EDATA SIZE       =   ----    ----
+   HDATA SIZE       =   ----    ----
+   XDATA CONST SIZE =   ----    ----
+   FAR CONST SIZE   =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
